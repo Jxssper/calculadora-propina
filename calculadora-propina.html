@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de propina: dividí la cuenta entre varios gratis</title>
+<meta name="description" content="Calculá la propina y dividí la cuenta entre varias personas al instante. Elegí el porcentaje, la cantidad de gente, y mirá cuánto paga cada uno. Gratis, sin registro.">
+<meta property="og:title" content="Calculadora de propina: dividí la cuenta entre varios">
+<meta property="og:description" content="Calculá cuánto paga cada persona al dividir la cuenta y la propina. Gratis, al instante, sin registro.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --board: #1c3329;
+    --board-2: #22392e;
+    --board-3: #294636;
+    --chalk-line: #3c5a48;
+    --chalk: #f4f1e5;
+    --chalk-dim: #a9c2b1;
+    --amber: #f2b134;
+    --amber-dim: #b98a25;
+    --tomato: #e2574c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: var(--board);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.025) 0, transparent 45%),
+      radial-gradient(circle at 85% 75%, rgba(255,255,255,0.02) 0, transparent 45%);
+    color: var(--chalk);
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    min-height:100vh;
+  }
+  header{
+    padding: 40px 24px 8px;
+    text-align:center;
+  }
+  header h1{
+    font-family: 'Caveat', cursive;
+    font-weight:700;
+    font-size: clamp(34px, 6vw, 52px);
+    margin: 0 0 4px;
+    color: var(--chalk);
+    letter-spacing: 0.01em;
+  }
+  header h1 span{color: var(--amber);}
+  header p{
+    color: var(--chalk-dim);
+    font-size: 14px;
+    margin:0;
+    max-width: 440px;
+    margin-inline:auto;
+  }
+  .wrap{
+    max-width: 460px;
+    margin: 28px auto 60px;
+    padding: 0 20px;
+  }
+  .card{
+    background: var(--board-2);
+    border: 1px solid var(--chalk-line);
+    border-radius: 14px;
+    padding: 26px 24px;
+    position: relative;
+  }
+  .card + .card{margin-top:18px;}
+  .field{margin-bottom:20px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{
+    display:block;
+    font-size:12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--chalk-dim);
+    margin-bottom:10px;
+    font-family:'Space Mono', monospace;
+  }
+  .amount-input{
+    display:flex;
+    align-items:center;
+    background: var(--board);
+    border: 1px solid var(--chalk-line);
+    border-radius: 10px;
+    padding: 4px 16px;
+  }
+  .amount-input .currency{
+    font-family:'Space Mono', monospace;
+    color: var(--chalk-dim);
+    font-size: 22px;
+    margin-right: 6px;
+  }
+  .amount-input input{
+    flex:1;
+    background:none;
+    border:none;
+    outline:none;
+    color: var(--chalk);
+    font-family:'Space Mono', monospace;
+    font-size: 26px;
+    padding: 12px 0;
+    width: 100%;
+  }
+  .tip-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:8px;
+  }
+  .tip-btn{
+    background: var(--board);
+    border: 1px solid var(--chalk-line);
+    color: var(--chalk);
+    padding: 12px 4px;
+    border-radius: 8px;
+    font-family:'Space Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    cursor:pointer;
+  }
+  .tip-btn:hover{border-color: var(--amber-dim);}
+  .tip-btn.active{
+    background: rgba(242,177,52,0.14);
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+  .custom-tip-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+  }
+  .custom-tip-row input[type="range"]{
+    flex:1;
+    accent-color: var(--amber);
+  }
+  .custom-tip-val{
+    font-family:'Space Mono', monospace;
+    color: var(--amber);
+    font-size: 14px;
+    min-width: 44px;
+    text-align:right;
+  }
+  .stepper{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 20px;
+  }
+  .stepper button{
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--chalk-line);
+    background: var(--board);
+    color: var(--chalk);
+    font-size: 20px;
+    font-family:'Space Mono', monospace;
+    cursor:pointer;
+  }
+  .stepper button:hover{border-color: var(--amber-dim); color: var(--amber);}
+  .stepper .count{
+    font-family:'Space Mono', monospace;
+    font-size: 30px;
+    min-width: 50px;
+    text-align:center;
+  }
+  .divider{
+    border: none;
+    border-top: 2px dashed var(--chalk-line);
+    margin: 22px 0;
+  }
+  .result-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--chalk-dim);
+    margin-bottom: 10px;
+  }
+  .result-row span:last-child{color: var(--chalk); font-size:16px;}
+  .per-person{
+    text-align:center;
+    margin-top: 18px;
+  }
+  .per-person .label{
+    font-family:'Caveat', cursive;
+    font-size: 22px;
+    color: var(--chalk-dim);
+  }
+  .per-person .value{
+    font-family:'Space Mono', monospace;
+    font-weight:700;
+    font-size: clamp(40px, 10vw, 56px);
+    color: var(--amber);
+    line-height: 1.1;
+  }
+  .actions{
+    display:flex;
+    gap:10px;
+    margin-top: 20px;
+  }
+  button.action-btn{
+    flex:1;
+    background: var(--amber);
+    color: #1c1408;
+    border:none;
+    padding: 13px 16px;
+    border-radius: 8px;
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+    letter-spacing:0.02em;
+    font-family: 'Space Mono', monospace;
+  }
+  button.action-btn:hover{filter:brightness(1.08);}
+  button.action-btn.secondary{
+    background: transparent;
+    color: var(--chalk);
+    border: 1px solid var(--chalk-line);
+  }
+  .seo-content{
+    max-width: 460px;
+    margin: 30px auto 0;
+    padding: 0 20px;
+    color: var(--chalk-dim);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .seo-content h2{
+    font-family: 'Caveat', cursive;
+    color: var(--chalk);
+    font-size: 26px;
+    margin-bottom: 6px;
+  }
+  .seo-content h3{
+    font-family:'Space Mono', monospace;
+    color: var(--chalk);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 24px 0 8px;
+  }
+  .faq-item{margin-bottom:14px;}
+  .faq-q{color: var(--chalk); font-weight:600; margin-bottom:4px;}
+  footer{
+    text-align:center;
+    color: var(--chalk-dim);
+    font-size: 12px;
+    padding: 24px;
+    font-family:'Space Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Calculá y dividí la <span>propina</span></h1>
+  <p>Poné el total de la cuenta, elegí el porcentaje y la cantidad de personas. Al instante, sin registrarte.</p>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="field">
+      <label for="bill-amount">Total de la cuenta</label>
+      <div class="amount-input">
+        <span class="currency" id="currency-symbol">$</span>
+        <input type="number" id="bill-amount" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Propina</label>
+      <div class="tip-grid" id="tip-grid">
+        <button type="button" class="tip-btn" data-tip="10">10%</button>
+        <button type="button" class="tip-btn active" data-tip="15">15%</button>
+        <button type="button" class="tip-btn" data-tip="20">20%</button>
+        <button type="button" class="tip-btn" data-tip="custom">Otro</button>
+      </div>
+      <div class="custom-tip-row" id="custom-tip-row" style="display:none;">
+        <input type="range" id="custom-tip-slider" min="0" max="50" step="1" value="15">
+        <span class="custom-tip-val" id="custom-tip-val">15%</span>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:0;">
+      <label>Personas</label>
+      <div class="stepper">
+        <button type="button" id="people-minus">−</button>
+        <span class="count" id="people-count">2</span>
+        <button type="button" id="people-plus">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="result-row">
+      <span>Propina (<span id="tip-percent-label">15</span>%)</span>
+      <span id="tip-amount">$0.00</span>
+    </div>
+    <div class="result-row">
+      <span>Total con propina</span>
+      <span id="total-amount">$0.00</span>
+    </div>
+    <hr class="divider">
+    <div class="per-person">
+      <div class="label">Cada persona paga</div>
+      <div class="value" id="per-person-amount">$0.00</div>
+    </div>
+    <div class="actions">
+      <button type="button" class="action-btn secondary" id="copy-btn">Copiar resumen</button>
+    </div>
+  </div>
+</div>
+
+<section class="seo-content">
+  <h2>Cómo dividir la cuenta sin hacer cuentas a mano</h2>
+  <p>Esta calculadora resuelve el momento incómodo de dividir la cuenta entre amigos o compañeros de trabajo. Ingresás el total, elegís qué porcentaje de propina dejar, cuántas personas van a pagar, y te muestra al instante cuánto le toca a cada uno —incluyendo la propina ya repartida.</p>
+
+  <h3>Preguntas frecuentes</h3>
+  <div class="faq-item">
+    <p class="faq-q">¿Qué porcentaje de propina es lo normal?</p>
+    <p>Depende del país y del tipo de lugar, pero un 10% suele ser lo mínimo esperado en restaurantes, y 15-20% es común cuando el servicio fue bueno. Por eso esta calculadora trae esos valores predefinidos, pero podés poner cualquier porcentaje con la opción "Otro".</p>
+  </div>
+  <div class="faq-item">
+    <p class="faq-q">¿La propina se divide en partes iguales entre todos?</p>
+    <p>Sí, esta herramienta reparte el total (cuenta + propina) en partes iguales entre la cantidad de personas que indiques. Si alguien pidió mucho más que el resto y quieren dividirlo de forma distinta, esta calculadora no cubre ese caso —está pensada para el reparto parejo, que es el más común.</p>
+  </div>
+  <div class="faq-item">
+    <p class="faq-q">¿Necesito internet para usarla?</p>
+    <p>Solo para cargar la página la primera vez. El cálculo en sí ocurre en tu navegador, no se envía ningún dato a ningún servidor.</p>
+  </div>
+</section>
+
+<footer>Todo el cálculo ocurre en tu navegador. No se envía ni almacena ningún dato.</footer>
+
+<script>
+const billAmount = document.getElementById('bill-amount');
+const tipGrid = document.getElementById('tip-grid');
+const customTipRow = document.getElementById('custom-tip-row');
+const customTipSlider = document.getElementById('custom-tip-slider');
+const customTipVal = document.getElementById('custom-tip-val');
+const peopleMinus = document.getElementById('people-minus');
+const peoplePlus = document.getElementById('people-plus');
+const peopleCount = document.getElementById('people-count');
+const tipPercentLabel = document.getElementById('tip-percent-label');
+const tipAmountEl = document.getElementById('tip-amount');
+const totalAmountEl = document.getElementById('total-amount');
+const perPersonEl = document.getElementById('per-person-amount');
+const copyBtn = document.getElementById('copy-btn');
+
+let tipPercent = 15;
+let people = 2;
+
+function formatMoney(n){
+  return '$' + n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+tipGrid.addEventListener('click', (e) => {
+  const btn = e.target.closest('.tip-btn');
+  if (!btn) return;
+  [...tipGrid.querySelectorAll('.tip-btn')].forEach(b => b.classList.toggle('active', b === btn));
+
+  if (btn.dataset.tip === 'custom'){
+    customTipRow.style.display = 'flex';
+    tipPercent = parseInt(customTipSlider.value, 10);
+  } else {
+    customTipRow.style.display = 'none';
+    tipPercent = parseInt(btn.dataset.tip, 10);
+  }
+  calculate();
+});
+
+customTipSlider.addEventListener('input', () => {
+  tipPercent = parseInt(customTipSlider.value, 10);
+  customTipVal.textContent = tipPercent + '%';
+  calculate();
+});
+
+peopleMinus.addEventListener('click', () => {
+  people = Math.max(1, people - 1);
+  peopleCount.textContent = people;
+  calculate();
+});
+peoplePlus.addEventListener('click', () => {
+  people = Math.min(50, people + 1);
+  peopleCount.textContent = people;
+  calculate();
+});
+
+billAmount.addEventListener('input', calculate);
+
+function calculate(){
+  const bill = parseFloat(billAmount.value) || 0;
+  const tip = bill * (tipPercent / 100);
+  const total = bill + tip;
+  const perPerson = total / people;
+
+  tipPercentLabel.textContent = tipPercent;
+  tipAmountEl.textContent = formatMoney(tip);
+  totalAmountEl.textContent = formatMoney(total);
+  perPersonEl.textContent = formatMoney(perPerson);
+}
+
+copyBtn.addEventListener('click', async () => {
+  const bill = parseFloat(billAmount.value) || 0;
+  const tip = bill * (tipPercent / 100);
+  const total = bill + tip;
+  const perPerson = total / people;
+
+  const summary = 'Cuenta: ' + formatMoney(bill) +
+    '\nPropina (' + tipPercent + '%): ' + formatMoney(tip) +
+    '\nTotal: ' + formatMoney(total) +
+    '\nEntre ' + people + ' personas: ' + formatMoney(perPerson) + ' c/u';
+
+  try {
+    await navigator.clipboard.writeText(summary);
+    const original = copyBtn.textContent;
+    copyBtn.textContent = '¡Copiado!';
+    setTimeout(() => { copyBtn.textContent = original; }, 1500);
+  } catch (err) {
+    alert('No se pudo copiar. Resumen:\n\n' + summary);
+  }
+});
+
+calculate();
+</script>
+
+</body>
+</html>
